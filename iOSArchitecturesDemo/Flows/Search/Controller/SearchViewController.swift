@@ -6,6 +6,7 @@
 //  Copyright © 2018 ekireev. All rights reserved.
 //
 
+
 import UIKit
 
 final class SearchViewController: UIViewController {
@@ -16,15 +17,31 @@ final class SearchViewController: UIViewController {
         return self.view as! SearchView
     }
     
-    internal var searchResults = [ITunesApp](){
-    didSet {
-        self.searchView.tableView.isHidden = false
-           self.searchView.tableView.reloadData()
-           self.searchView.searchBar.resignFirstResponder()
-       }
+    internal var appsSearchResults = [ITunesApp](){
+        didSet {
+            self.searchView.tableView.isHidden = false
+            self.searchView.tableView.reloadData()
+            self.searchView.searchBar.resignFirstResponder()
+        }
+    }
+    
+    internal var songsSearcgResult = [ITunesSong]() {
+        didSet {
+            self.searchView.tableView.isHidden = false
+            self.searchView.tableView.reloadData()
+            self.searchView.searchBar.resignFirstResponder()
+        }
     }
     
     var searchPresenter: SearchViewOutput?
+    
+    internal var searchType: ITunesSearch.meadiType {
+        if self.searchView.segmentedControl.selectedSegmentIndex == 0 {
+            return .app
+        } else {
+            return .media
+        }
+    }
     
     private struct Constants {
         static let reuseIdentifier = "reuseId"
@@ -68,7 +85,11 @@ final class SearchViewController: UIViewController {
 extension SearchViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return searchResults.count
+        if searchType == .app {
+            return appsSearchResults.count
+        } else {
+            return songsSearcgResult.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -76,9 +97,17 @@ extension SearchViewController: UITableViewDataSource {
         guard let cell = dequeuedCell as? AppCell else {
             return dequeuedCell
         }
-        let app = self.searchResults[indexPath.row]
-        let cellModel = AppCellModelFactory.cellModel(from: app)
-        cell.configure(with: cellModel)
+        
+        if searchType == .app {
+            let app = self.appsSearchResults[indexPath.row]
+            let cellModel = AppCellModelFactory.cellModel(from: app)
+            cell.configure(with: cellModel)
+        } else {
+            let songs = self.songsSearcgResult[indexPath.row]
+            let cellModel = SongCellFactory.cellModel(from: songs)
+            cell.configure(with: cellModel)
+        }
+        
         return cell
     }
 }
@@ -88,8 +117,14 @@ extension SearchViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let app = searchResults[indexPath.row]
-        self.searchPresenter?.viewDidSelectApp(app)
+        
+        if searchType == .app {
+            let app = appsSearchResults[indexPath.row]
+            self.searchPresenter?.viewDidSelectApp(app)
+        } else {
+            let song = songsSearcgResult[indexPath.row]
+            self.searchPresenter?.viewDidSelectSong(song)
+        }
     }
 }
 
@@ -105,14 +140,13 @@ extension SearchViewController: UISearchBarDelegate {
             searchBar.resignFirstResponder()
             return
         }
-        self.searchPresenter?.viewDidSearch(with: query)
+        self.searchPresenter?.viewDidSearch(with: query, for: self.searchType)
     }
 }
 
 // MARK: - SearchViewInput
 
 extension SearchViewController : SearchViewInput {
-    
     
     func throbber(show: Bool) {
         UIApplication.shared.isNetworkActivityIndicatorVisible = show

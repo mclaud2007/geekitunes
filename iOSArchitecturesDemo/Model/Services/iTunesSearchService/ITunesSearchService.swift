@@ -78,6 +78,10 @@ final class ITunesSearchService {
             result
                 .withValue { data in
                     do {
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+                        self.decoder.dateDecodingStrategy = .formatted(dateFormatter)
+                        
                         let result = try self.decoder.decode(ITunesSearchResult<ITunesSong>.self, from: data)
                         let apps = result.results
                         completion?(.success(apps))

@@ -16,6 +16,7 @@ final class SearchView: UIView {
     let tableView = UITableView()
     let emptyResultView = UIView()
     let emptyResultLabel = UILabel()
+    let segmentedControl = UISegmentedControl()
     
     // MARK: - Init
     
@@ -34,6 +35,7 @@ final class SearchView: UIView {
     private func configureUI() {
         self.backgroundColor = .white
         self.addSearchBar()
+        self.addSegmentedControl()
         self.addTableView()
         self.addEmptyResultView()
         self.setupConstraints()
@@ -43,6 +45,14 @@ final class SearchView: UIView {
         self.searchBar.translatesAutoresizingMaskIntoConstraints = false
         self.searchBar.searchBarStyle = .minimal
         self.addSubview(self.searchBar)
+    }
+    
+    private func addSegmentedControl() {
+        self.segmentedControl.translatesAutoresizingMaskIntoConstraints = false
+        self.segmentedControl.insertSegment(withTitle: "App", at: 0, animated: true)
+        self.segmentedControl.insertSegment(withTitle: "Music", at: 1, animated: true)
+        self.segmentedControl.selectedSegmentIndex = 0
+        self.addSubview(self.segmentedControl)
     }
     
     private func addTableView() {
@@ -73,7 +83,11 @@ final class SearchView: UIView {
         let safeArea = self.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            self.searchBar.topAnchor.constraint(equalTo: self.topAnchor, constant: 8.0),
+            self.segmentedControl.topAnchor.constraint(equalTo: self.topAnchor, constant: 8.0),
+            self.segmentedControl.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            self.segmentedControl.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+            
+            self.searchBar.topAnchor.constraint(equalTo: self.segmentedControl.bottomAnchor, constant: 8.0),
             self.searchBar.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
             self.searchBar.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
             
