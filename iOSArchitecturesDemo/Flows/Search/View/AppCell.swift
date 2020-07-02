@@ -56,6 +56,12 @@ final class AppCell: UITableViewCell {
         self.ratingLabel.text = cellModel.rating
     }
     
+    func configure(with cellModel: SongCellModel) {
+        self.titleLabel.text = cellModel.title
+        self.subtitleLabel.text = cellModel.subtitle
+        self.ratingLabel.text = cellModel.rating
+    }
+    
     // MARK: - UI
     
     override func prepareForReuse() {
